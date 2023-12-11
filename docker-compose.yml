@@ -1,0 +1,44 @@
+version: "3"
+
+networks:
+  web:
+    external: true
+  internal:
+    external: false
+
+services:
+  mariadb-lsmu:
+    image: mariadb
+    restart: always
+    ports:
+      - '3309:3306' 
+    command: --init-file /data/application/init.sql
+    environment:
+      - MARIADB_ROOT_PASSWORD=toor
+    networks:
+      - internal
+    # labels:
+    #   - traefik.enable=false
+    volumes:
+      - ./init.sql:/data/application/init.sql
+      - mariadb-lsmu:/var/lib/mysql
+
+
+  moodle-app:
+    build: .
+    restart: always
+    ports:
+      - '5555:5555'
+    # labels:
+    #   # - traefik.enable=false
+    #   - traefik.http.routers.mapp.rule=Host(`api.reshadow.lt`)
+    #   - traefik.http.routers.mapp.tls=true
+    #   - traefik.http.routers.mapp.tls.certresolver=myresolver
+    #   - traefik.port=5555
+    networks:
+      - web
+
+
+volumes:
+  mariadb-lsmu:
+    driver: local
